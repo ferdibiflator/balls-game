@@ -1,10 +1,13 @@
+/**
+ * Шарик, главный герой
+ */
 export default class Ball {
   /**
    * Конструктор. Инициализирует объект необхоимыми свойствами
    */
-  constructor(context, radius, position = {x: radius, y: radius}) {
+  constructor(context, position) {
     this.context = context
-    this.radius = radius
+    this.radius = 30
     this.position = position
     this.isSelected = false
     this.isMoving = false

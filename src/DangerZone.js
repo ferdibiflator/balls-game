@@ -1,3 +1,6 @@
+/**
+ * Область, в которой шарики будут двигаться
+ */
 export default class DangerZone {
   /**
    * Конструктор. Инициализирует объект необхоимыми свойствами
@@ -10,7 +13,7 @@ export default class DangerZone {
   }
 
   /**
-   * Отобразить область
+   * Отрисовать область
    */
   draw() {
     const { x, y } = this.position
