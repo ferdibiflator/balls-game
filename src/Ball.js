@@ -50,10 +50,10 @@ export default class Ball {
   doStep() {
     const { x: currPosX, y: currPosY } = this.position
 
-    this.setPosition({
+    this.position = {
       x: currPosX + this.stepSize * this.stepVector.x / (Math.abs(this.stepVector.x) + Math.abs(this.stepVector.y)),
       y: currPosY + this.stepSize * this.stepVector.y / (Math.abs(this.stepVector.x) + Math.abs(this.stepVector.y))
-    })
+    }
   }
 
   /**
