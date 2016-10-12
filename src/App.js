@@ -31,10 +31,7 @@ export default class App {
    * Точка старта приложения
    */
   start() {
-    const fps = 60,
-          interval = 1000 / fps
-
-    setInterval(::this.calcAndDrawFrame, interval)
+    this.calcAndDrawFrame();
   }
 
   /**
@@ -66,6 +63,8 @@ export default class App {
 
       ball.draw()
     })
+
+    requestAnimationFrame(::this.calcAndDrawFrame);
   }
 
   /**
