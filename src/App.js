@@ -38,10 +38,12 @@ export default class App {
    * Выполняет всю логику для получения одного кадра, и рисует его
    */
   calcAndDrawFrame() {
+    const balls = this.balls
+
     this.clearFrame()
     this.dangerZone.draw()
 
-    this.balls.forEach(ball => {
+    balls.forEach(ball => {
       if(ball.isSelected) {
         // меняем позицию выбранного курсором шарика
         ball.position = {...this.cursorPosition}
@@ -53,6 +55,14 @@ export default class App {
           const kickVector = this.getCollisionVectorWithZone(this.dangerZone, ball)
 
           if(kickVector) ball.kick(kickVector)
+
+          balls.forEach((anotherBall) => {
+            if(anotherBall !== ball) {
+              const kickVector = this.getCollisionVectorBalls(ball, anotherBall)
+
+              if (kickVector) ball.kick(kickVector)
+            }
+          })
         } else{
           // шарик вне опасной зоны, он может отдохнуть
           ball.isMoving = false
@@ -110,6 +120,25 @@ export default class App {
       return { x: 0.5 * dirX, y: 0.5 * dirY }
 
     return { x: dirX, y: dirY }
+  }
+
+  getCollisionVectorBalls(ballA, ballB) {
+    const deltaX = ballA.position.x - ballB.position.x
+    const deltaY = ballA.position.y - ballB.position.y
+    const distance = Math.sqrt(deltaX**2 + deltaY**2)
+
+    if(distance > ballA.radius + ballB.radius) {
+      return null
+    }
+
+    const deltaSum = Math.abs(deltaX) + Math.abs(deltaY)
+
+    const vector = {
+      x: 1 / deltaSum * deltaX,
+      y: 1 / deltaSum * deltaY
+    }
+
+    return vector
   }
 
   /**
