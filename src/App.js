@@ -49,7 +49,10 @@ export default class App {
         if(this.isBallInZone(this.dangerZone, ball)) {
           // шарик в опасной зоне, посоветуем ему начать двигаться и соблюдать коллизии
           ball.isMoving = true
-          ball.collision(this.checkBallCollisionInsideZone(this.dangerZone, ball))
+
+          const kickVector = this.getCollisionVectorWithZone(this.dangerZone, ball)
+
+          if(kickVector) ball.kick(kickVector)
         } else{
           // шарик вне опасной зоны, он может отдохнуть
           ball.isMoving = false
@@ -85,20 +88,28 @@ export default class App {
    * Проверка на коллизии шара со стенками области ИЗНУТРИ.
    * NOTE: подразумевается, что шар уже находится внутри проверямой области
    */
-  checkBallCollisionInsideZone(zone, ball) {
-    const { radius: ballRadius, position: { x: ballPosX, y: ballPosY } } = ball
-    const { width: zoneWidth, height: zoneHeight, position: { x: zonePosX, y: zonePosY } } = zone
-    const collision = {top: false, right: false, bottom: false, left: false}
+  getCollisionVectorWithZone(zone, ball) {
+    const {radius: ballRadius, position: {x: ballPosX, y: ballPosY}} = ball
+    const {width: zoneWidth, height: zoneHeight, position: {x: zonePosX, y: zonePosY}} = zone
+    // const collision = {top: false, right: false, bottom: false, left: false}
+    let dirY = 0
+    let dirX = 0
 
     // Проверка на наличие коллизий по оси Y
-    if(ballPosY - ballRadius <= zonePosY) collision.top = true
-    if(ballPosY + ballRadius >= zonePosY + zoneHeight) collision.bottom = true
+    if (ballPosY - ballRadius <= zonePosY) dirY = 1
+    else if (ballPosY + ballRadius >= zonePosY + zoneHeight) dirY = -1
 
     // Проверка на наличие коллизий по оси X
-    if(ballPosX - ballRadius <= zonePosX) collision.left = true
-    if(ballPosX + ballRadius >= zonePosX + zoneWidth) collision.right = true
+    if (ballPosX - ballRadius <= zonePosX) dirX = 1
+    else if (ballPosX + ballRadius >= zonePosX + zoneWidth) dirX = -1
 
-    return collision
+    if (!dirX && !dirY)
+      return null
+
+    if (dirX && dirY)
+      return { x: 0.5 * dirX, y: 0.5 * dirY }
+
+    return { x: dirX, y: dirY }
   }
 
   /**

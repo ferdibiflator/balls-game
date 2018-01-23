@@ -11,7 +11,7 @@ export default class Ball {
     this.position = position
     this.isSelected = false
     this.isMoving = false
-    this.stepVector = {x: Math.floor(Math.random() * 100) - 50, y: Math.floor(Math.random() * 100) - 50}
+    this.moveVector = this._generateMoveVector()
     this.stepSize = 4
   }
 
@@ -19,7 +19,7 @@ export default class Ball {
    * Отображает шарик на игровом поле. Если он выбран, то отображает его с выделением
    */
   draw() {
-    const { x, y } = this.position
+    const {x, y} = this.position
     const context = this.context
 
     context.beginPath()
@@ -27,7 +27,7 @@ export default class Ball {
     context.fillStyle = '#12ac28'
     context.fill()
 
-    if(this.isSelected) {
+    if (this.isSelected) {
       context.strokeStyle = '#f2a205'
       context.lineWidth = 4
       context.stroke()
@@ -51,35 +51,43 @@ export default class Ball {
    * Передвинуть шар на один шаг, направление движения рассчитывается на основе его вектора движения
    */
   doStep() {
-    const { x: currPosX, y: currPosY } = this.position
+    const {x: currPosX, y: currPosY} = this.position
 
     this.position = {
-      x: currPosX + this.stepSize * this.stepVector.x / (Math.abs(this.stepVector.x) + Math.abs(this.stepVector.y)),
-      y: currPosY + this.stepSize * this.stepVector.y / (Math.abs(this.stepVector.x) + Math.abs(this.stepVector.y))
+      x: currPosX + this.stepSize * this.moveVector.x,
+      y: currPosY + this.stepSize * this.moveVector.y
     }
   }
 
-  /**
-   * Сообщить шару, что у него коллизия со сторон(ы): top, right, bottom, left.
-   * На основе коллизий изменяет вектор движения шара
-   */
-  collision(from) {
-    // если шарик прижали сверху и снизу, то останавливаем перемещения по оси Y
-    if(from.top && from.bottom) {
-      this.stepVector.y = 0
-    }
-    // если шарик в коллизии сверху И двигался наверх ИЛИ в коллизии снизу И двигался вниз
-    else if( (from.top && this.stepVector.y < 0) || (from.bottom && this.stepVector.y > 0) ) {
-      this.stepVector.y = -this.stepVector.y
+  kick({x, y}) {
+    const {x: currX, y: currY} = this.moveVector
+
+    if(x) {
+      if (this._isSameDirections(x, currX)) {
+        this.moveVector.x = currX + (x - currX) / 2
+      } else {
+        this.moveVector.x = currX + (x - currX)
+      }
     }
 
-    // если шарик прижали слева и справа, то останавливаем перемещения по оси X
-    if(from.left && from.right) {
-      this.stepVector.x = 0
+    if(y) {
+      if (y && this._isSameDirections(y, currY)) {
+        this.moveVector.y = currY + (y - currY) / 2
+      } else {
+        this.moveVector.y = currY + (y - currY)
+      }
     }
-    // если шарик в коллизии слева И двигался влево ИЛИ в коллизии справа И двигался направо
-    else if((from.left && this.stepVector.x < 0) || (from.right && this.stepVector.x > 0)) {
-      this.stepVector.x = -this.stepVector.x
-    }
+  }
+
+  _generateMoveVector() {
+    const x = Math.random()
+    const y = 1 - x
+    const direction = Math.random() >= 0.5 ? 1 : -1
+
+    return {x: x * direction, y: y * direction}
+  }
+
+  _isSameDirections(a, b) {
+    return (a < 0 && b < 0) || (a >= 0 && b >= 0)
   }
 }
