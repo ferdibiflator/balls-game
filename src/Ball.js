@@ -1,3 +1,5 @@
+const MSEC_IN_SEC = 1000
+
 /**
  * Шарик, главный герой
  */
@@ -12,7 +14,8 @@ export default class Ball {
     this.isSelected = false
     this.isMoving = false
     this.moveVector = this._generateMoveVector()
-    this.stepSize = 4
+    this.velocity = 300
+    this.lastMoveTime = Date.now()
   }
 
   /**
@@ -50,13 +53,22 @@ export default class Ball {
   /**
    * Передвинуть шар на один шаг, направление движения рассчитывается на основе его вектора движения
    */
-  doStep() {
+  move(time) {
     const {x: currPosX, y: currPosY} = this.position
+    const timeDelta = (time - this.lastMoveTime) / MSEC_IN_SEC
+    const moveAmount = this.velocity * timeDelta
 
     this.position = {
-      x: currPosX + this.stepSize * this.moveVector.x,
-      y: currPosY + this.stepSize * this.moveVector.y
+      x: currPosX + moveAmount * this.moveVector.x,
+      y: currPosY + moveAmount * this.moveVector.y
     }
+
+    this.lastMoveTime = time
+  }
+
+  setPosition ({x, y}, time) {
+    this.position = { x, y }
+    this.lastMoveTime = time
   }
 
   kick({x, y}) {

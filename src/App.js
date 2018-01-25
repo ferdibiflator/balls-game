@@ -1,6 +1,9 @@
 import Ball from './Ball'
 import DangerZone from './DangerZone'
 
+
+const CALC_INTERVAL = Math.ceil(1000 / 120) // calc with particular FPS
+
 /**
  * Основной каркас приложения, содержит "игровое поле", на котором располагаются "опасная область" и шарики.
  * А также основную логику приложения
@@ -18,6 +21,7 @@ export default class App {
       x: 0,
       y: 0
     }
+    this.lastFrameTime = Date.now()
 
     this.dangerZone = new DangerZone(this.context,
       this.canvas.width / 2, this.canvas.height,
@@ -31,23 +35,14 @@ export default class App {
    * Точка старта приложения
    */
   start() {
-    this.calcAndDrawFrame();
+    this.drawFrame();
   }
 
-  /**
-   * Выполняет всю логику для получения одного кадра, и рисует его
-   */
-  calcAndDrawFrame() {
+  calcFrame(time) {
     const balls = this.balls
 
-    this.clearFrame()
-    this.dangerZone.draw()
-
     balls.forEach(ball => {
-      if(ball.isSelected) {
-        // меняем позицию выбранного курсором шарика
-        ball.position = {...this.cursorPosition}
-      } else {
+      if (!ball.isSelected){
         if(this.isBallInZone(this.dangerZone, ball)) {
           // шарик в опасной зоне, посоветуем ему начать двигаться и соблюдать коллизии
           ball.isMoving = true
@@ -70,14 +65,41 @@ export default class App {
 
         if(ball.isMoving) {
           // шарику посоветовали двигаться - он двигается
-          ball.doStep()
+          ball.move(time)
         }
+      }
+    })
+  }
+
+  drawFrame() {
+    const time = Date.now()
+    const timeDelta = time - this.lastFrameTime
+    const calcCount = Math.ceil(timeDelta / CALC_INTERVAL)
+    const balls = this.balls
+
+    for(let i = 1; i <= calcCount; i++) {
+      if(i === calcCount) {
+        this.calcFrame(time)
+      } else {
+        this.calcFrame(this.lastFrameTime + i * CALC_INTERVAL)
+      }
+    }
+
+    this.lastFrameTime = time
+
+    this.clearFrame()
+    this.dangerZone.draw()
+
+    balls.forEach(ball => {
+      if(ball.isSelected) {
+        // меняем позицию выбранного курсором шарика
+        ball.setPosition(this.cursorPosition, time)
       }
 
       ball.draw()
     })
 
-    requestAnimationFrame(::this.calcAndDrawFrame);
+    requestAnimationFrame(::this.drawFrame);
   }
 
   /**
